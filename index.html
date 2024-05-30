@@ -1,0 +1,280 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Gestión de Usuarios y Transferencias</title>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" />
+</head>
+
+<body>
+    <div class="container mt-5">
+        <h1 class="text-center">Gestión de Usuarios</h1>
+
+        <!-- Formulario para agregar un nuevo usuario -->
+        <form id="formularioUsuario">
+            <div class="form-group">
+                <label for="nombre">Nombre</label>
+                <input type="text" class="form-control" id="nombre" required />
+            </div>
+            <div class="form-group">
+                <label for="balance">Balance</label>
+                <input type="number" class="form-control" id="balance" required />
+            </div>
+            <button type="submit" class="btn btn-primary">Agregar Usuario</button>
+        </form>
+
+        <h2 class="mt-5">Lista de Usuarios</h2>
+        <table class="table table-striped">
+            <thead>
+                <tr>
+                    <th>Nombre</th>
+                    <th>Balance</th>
+                    <th>Acciones</th>
+                </tr>
+            </thead>
+            <tbody class="usuarios"></tbody>
+        </table>
+
+        <!-- Modal para editar un usuario -->
+        <div class="modal fade" id="exampleModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+            <div class="modal-dialog" role="document">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="exampleModalLabel">Editar Usuario</h5>
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                            <span aria-hidden="true">&times;</span>
+                        </button>
+                    </div>
+                    <div class="modal-body">
+                        <form id="formularioEditarUsuario">
+                            <div class="form-group">
+                                <label for="edit-nombre">Nombre</label>
+                                <input type="text" class="form-control" id="edit-nombre" required />
+                            </div>
+                            <div class="form-group">
+                                <label for="edit-balance">Balance</label>
+                                <input type="number" class="form-control" id="edit-balance" required />
+                            </div>
+                            <input type="hidden" id="edit-id" />
+                            <button type="submit" class="btn btn-primary">Guardar Cambios</button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <h2 class="mt-5">Realizar Transferencia</h2>
+        <form id="formularioTransferencia">
+            <div class="form-group">
+                <label for="emisor">Emisor</label>
+                <select class="form-control" id="emisor" required></select>
+            </div>
+            <div class="form-group">
+                <label for="receptor">Receptor</label>
+                <select class="form-control" id="receptor" required></select>
+            </div>
+            <div class="form-group">
+                <label for="monto">Monto</label>
+                <input type="number" class="form-control" id="monto" required />
+            </div>
+            <button type="submit" class="btn btn-primary">Transferir</button>
+        </form>
+
+        <h2 class="mt-5">Historial de Transferencias</h2>
+        <table class="table table-striped">
+            <thead>
+                <tr>
+                    <th>Fecha</th>
+                    <th>Emisor</th>
+                    <th>Receptor</th>
+                    <th>Monto</th>
+                </tr>
+            </thead>
+            <tbody class="transferencias"></tbody>
+        </table>
+    </div>
+
+    <script src="https://code.jquery.com/jquery-3.3.1.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js"></script>
+    <script>
+        // Obtener usuarios y actualizar las tablas y selects
+        const getUsuarios = async () => {
+            const response = await fetch("http://localhost:3000/usuarios");
+            let data = await response.json();
+            $(".usuarios").html("");
+
+            $.each(data, (i, c) => {
+                $(".usuarios").append(`
+                    <tr>
+                      <td>${c.nombre}</td>
+                      <td>${c.balance}</td>
+                      <td>
+                        <button
+                          class="btn btn-warning mr-2"
+                          data-toggle="modal"
+                          data-target="#exampleModal"
+                          onclick="setInfoModal('${c.nombre}', '${c.balance}', '${c.id}')"
+                        >
+                          Editar</button
+                        ><button class="btn btn-danger" onclick="eliminarUsuario('${c.id}')">Eliminar</button>
+                      </td>
+                    </tr>
+               `);
+
+                $("#emisor").append(`<option value="${c.id}">${c.nombre}</option>`);
+                $("#receptor").append(`<option value="${c.id}">${c.nombre}</option>`);
+            });
+        };
+
+        const getTransferencias = async () => {
+            const response = await fetch("http://localhost:3000/transferencias");
+            let data = await response.json();
+            $(".transferencias").html("");
+
+            data.forEach((t) => {
+                $(".transferencias").append(`
+                  <tr>
+                    <td> ${formatDate(t.fecha)} </td>
+                    <td> ${t.emisor} </td>
+                    <td> ${t.receptor} </td>
+                    <td> ${t.monto} </td>
+                  </tr>
+                `);
+            });
+        };
+
+        // Formatear fecha
+        const formatDate = (date) => {
+            const d = new Date(date);
+            return `${d.getDate()}/${d.getMonth() + 1}/${d.getFullYear()} ${d.getHours()}:${d.getMinutes()}`;
+        };
+
+        // Agregar nuevo usuario
+        $("#formularioUsuario").submit(async (e) => {
+            e.preventDefault();
+            let nombre = $("#nombre").val();
+            let balance = $("#balance").val();
+            if (!nombre || !balance) {
+                alert("Debe completar todos los campos");
+                return false;
+            }
+            try {
+                const response = await fetch("http://localhost:3000/usuario", {
+                    method: "post",
+                    headers: {
+                        "Content-Type": "application/json",
+                    },
+                    body: JSON.stringify({
+                        nombre,
+                        balance: Number(balance),
+                    }),
+                });
+                const data = await response.json();
+                location.reload();
+            } catch (e) {
+                console.log(e);
+                alert("Algo salió mal..." + e);
+            }
+        });
+
+        // Eliminar usuario
+        const eliminarUsuario = async (id) => {
+            if (!confirm("Está seguro de eliminar el usuario?")) {
+                return;
+            }
+            try {
+                const response = await fetch("http://localhost:3000/usuario", {
+                    method: "delete",
+                    headers: {
+                        "Content-Type": "application/json",
+                    },
+                    body: JSON.stringify({
+                        id: Number(id),
+                    }),
+                });
+                location.reload();
+            } catch (e) {
+                console.log(e);
+                alert("Algo salió mal..." + e);
+            }
+        };
+
+        // Setear información en el modal para editar usuario
+        const setInfoModal = (nombre, balance, id) => {
+            $("#edit-nombre").val(nombre);
+            $("#edit-balance").val(balance);
+            $("#edit-id").val(id);
+        };
+
+        // Editar usuario
+        $("#formularioEditarUsuario").submit(async (e) => {
+            e.preventDefault();
+            let nombre = $("#edit-nombre").val();
+            let balance = $("#edit-balance").val();
+            let id = $("#edit-id").val();
+            if (!nombre || !balance || !id) {
+                alert("Debe completar todos los campos");
+                return false;
+            }
+            try {
+                const response = await fetch("http://localhost:3000/usuario", {
+                    method: "put",
+                    headers: {
+                        "Content-Type": "application/json",
+                    },
+                    body: JSON.stringify({
+                        id: Number(id),
+                        nombre,
+                        balance: Number(balance),
+                    }),
+                });
+                const data = await response.json();
+                location.reload();
+            } catch (e) {
+                console.log(e);
+                alert("Algo salió mal..." + e);
+            }
+        });
+
+        // Realizar transferencia
+        $("#formularioTransferencia").submit(async (e) => {
+            e.preventDefault();
+            let emisor = $("#emisor").val();
+            let receptor = $("#receptor").val();
+            let monto = $("#monto").val();
+            if (!monto || !emisor || !receptor) {
+                alert("Debe seleccionar un emisor, receptor y monto a transferir");
+                return false;
+            }
+            try {
+                const response = await fetch("http://localhost:3000/transferencia", {
+                    method: "post",
+                    headers: {
+                        "Content-Type": "application/json",
+                    },
+                    body: JSON.stringify({
+                        emisor: Number(emisor),
+                        receptor: Number(receptor),
+                        monto: Number(monto),
+                    }),
+                });
+                const data = await response.json();
+                location.reload();
+            } catch (e) {
+                console.log(e);
+                alert("Algo salió mal..." + e);
+            }
+        });
+
+        // Cargar usuarios y transferencias al cargar la página
+        $(document).ready(() => {
+            getUsuarios();
+            getTransferencias();
+        });
+    </script>
+</body>
+
+</html>
