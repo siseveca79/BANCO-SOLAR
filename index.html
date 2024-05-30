@@ -4,96 +4,127 @@
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Gestión de Usuarios y Transferencias</title>
-    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" />
+    <title>Banco Solar C.A</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.5.3/dist/css/bootstrap.min.css"
+        integrity="sha384-TX8t27EcRE3e/ihU7zmQxVncDAy5uIKz4rEkgIXeMed4M0jlfIDPvg6uqKI2xXr2" crossorigin="anonymous" />
+    <style>
+        body {
+            background: #e5e1dd;
+        }
+
+        form {
+            padding: 15px;
+            background: #f8f9fa;
+            border-radius: 10px;
+        }
+    </style>
 </head>
 
-<body>
-    <div class="container mt-5">
-        <h1 class="text-center">Gestión de Usuarios</h1>
+<body class="p-5">
+    <h1 class="text-center" style="font-size: 60px">&#127979;</h1>
+    <h2 class="text-center pb-0 mb-0">Banco Solar C.A</h2>
+    <hr class="w-25 pb-1" />
 
-        <!-- Formulario para agregar un nuevo usuario -->
-        <form id="formularioUsuario">
-            <div class="form-group">
-                <label for="nombre">Nombre</label>
-                <input type="text" class="form-control" id="nombre" required />
-            </div>
-            <div class="form-group">
-                <label for="balance">Balance</label>
-                <input type="number" class="form-control" id="balance" required />
-            </div>
-            <button type="submit" class="btn btn-primary">Agregar Usuario</button>
-        </form>
-
-        <h2 class="mt-5">Lista de Usuarios</h2>
-        <table class="table table-striped">
-            <thead>
-                <tr>
-                    <th>Nombre</th>
-                    <th>Balance</th>
-                    <th>Acciones</th>
-                </tr>
-            </thead>
-            <tbody class="usuarios"></tbody>
-        </table>
-
-        <!-- Modal para editar un usuario -->
-        <div class="modal fade" id="exampleModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
-            <div class="modal-dialog" role="document">
-                <div class="modal-content">
-                    <div class="modal-header">
-                        <h5 class="modal-title" id="exampleModalLabel">Editar Usuario</h5>
-                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                            <span aria-hidden="true">&times;</span>
-                        </button>
+    <div class="row m-auto px-5">
+        <div class="col-12 col-sm-5">
+            <form id="formularioUsuario">
+                <div class="form-group text-center">
+                    <h5>Agregar Nuevo Usuario</h5>
+                    <hr class="bg-white w-50" />
+                    <div class="d-flex align-items-center justify-content-center">
+                        Nombre:
+                        <input type="text" class="form-control d-inline mx-3" id="nombre" required />
+                        Balance:
+                        <input type="number" class="form-control d-inline mx-3" id="balance" required />
+                        <button type="submit" class="btn btn-danger">Agregar</button>
                     </div>
-                    <div class="modal-body">
-                        <form id="formularioEditarUsuario">
-                            <div class="form-group">
-                                <label for="edit-nombre">Nombre</label>
-                                <input type="text" class="form-control" id="edit-nombre" required />
-                            </div>
-                            <div class="form-group">
-                                <label for="edit-balance">Balance</label>
-                                <input type="number" class="form-control" id="edit-balance" required />
-                            </div>
-                            <input type="hidden" id="edit-id" />
-                            <button type="submit" class="btn btn-primary">Guardar Cambios</button>
-                        </form>
+                </div>
+            </form>
+            <br />
+        </div>
+
+        <div class="col-12 col-sm-7">
+            <form id="formularioTransferencia">
+                <div class="form-group text-center">
+                    <h5>Realizar una Transferencia</h5>
+                    <hr class="bg-white w-50" />
+                    <div class="d-flex align-items-center justify-content-center flex-wrap">
+                        <div class="mr-2">
+                            Emisor:
+                            <select id="emisor" class="form-control mx-2 w-auto d-inline" required></select>
+                        </div>
+
+                        <div class="mr-3">
+                            Receptor:
+                            <select id="receptor" class="form-control mx-2 w-auto d-inline" required></select>
+                        </div>
+
+                        <div class="mr-3">
+                            Monto:
+                            <input type="number" class="form-control mx-2 w-auto d-inline" id="monto" required />
+                        </div>
+
+                        <button type="submit" class="btn btn-danger">Realizar</button>
                     </div>
+                </div>
+            </form>
+        </div>
+
+        <div class="col-12 row mt-3 mx-0 px-0">
+            <div class="col-12 col-sm-5 text-center">
+                <h5>Tabla de usuarios</h5>
+                <table class="table bg-light">
+                    <thead class="bg-danger text-white">
+                        <tr>
+                            <th>Nombre</th>
+                            <th>Balance</th>
+                            <th>Acciones</th>
+                        </tr>
+                    </thead>
+                    <tbody class="usuarios"></tbody>
+                </table>
+            </div>
+
+            <div class="col-12 col-sm-7 text-center">
+                <h5>Tabla de Transferencias</h5>
+                <table class="table bg-light">
+                    <thead class="bg-danger text-white">
+                        <tr>
+                            <th>Fecha</th>
+                            <th>Emisor</th>
+                            <th>Receptor</th>
+                            <th>Monto</th>
+                        </tr>
+                    </thead>
+                    <tbody class="transferencias"></tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal para editar un usuario -->
+    <div class="modal fade" id="exampleModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel"
+        aria-hidden="true">
+        <div class="modal-dialog text-dark" role="document">
+            <div class="modal-content">
+                <div class="modal-body">
+                    <div class="row">
+                        <div class="col-2">Nombre</div>
+                        <div class="col-10">
+                            <input id="edit-nombre" type="text" class="form-control" required />
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-2">Balance</div>
+                        <div class="col-10">
+                            <input id="edit-balance" type="number" class="form-control" required />
+                        </div>
+                    </div>
+                    <input type="hidden" id="edit-id" />
+                    <button class="btn btn-danger" id="editButton">Editar</button>
                 </div>
             </div>
         </div>
-
-        <h2 class="mt-5">Realizar Transferencia</h2>
-        <form id="formularioTransferencia">
-            <div class="form-group">
-                <label for="emisor">Emisor</label>
-                <select class="form-control" id="emisor" required></select>
-            </div>
-            <div class="form-group">
-                <label for="receptor">Receptor</label>
-                <select class="form-control" id="receptor" required></select>
-            </div>
-            <div class="form-group">
-                <label for="monto">Monto</label>
-                <input type="number" class="form-control" id="monto" required />
-            </div>
-            <button type="submit" class="btn btn-primary">Transferir</button>
-        </form>
-
-        <h2 class="mt-5">Historial de Transferencias</h2>
-        <table class="table table-striped">
-            <thead>
-                <tr>
-                    <th>Fecha</th>
-                    <th>Emisor</th>
-                    <th>Receptor</th>
-                    <th>Monto</th>
-                </tr>
-            </thead>
-            <tbody class="transferencias"></tbody>
-        </table>
     </div>
 
     <script src="https://code.jquery.com/jquery-3.3.1.min.js"></script>
@@ -226,12 +257,11 @@
                         "Content-Type": "application/json",
                     },
                     body: JSON.stringify({
-                        id: Number(id),
                         nombre,
                         balance: Number(balance),
+                        id: Number(id),
                     }),
                 });
-                const data = await response.json();
                 location.reload();
             } catch (e) {
                 console.log(e);
@@ -245,8 +275,8 @@
             let emisor = $("#emisor").val();
             let receptor = $("#receptor").val();
             let monto = $("#monto").val();
-            if (!monto || !emisor || !receptor) {
-                alert("Debe seleccionar un emisor, receptor y monto a transferir");
+            if (!emisor || !receptor || !monto) {
+                alert("Debe completar todos los campos");
                 return false;
             }
             try {
@@ -261,7 +291,6 @@
                         monto: Number(monto),
                     }),
                 });
-                const data = await response.json();
                 location.reload();
             } catch (e) {
                 console.log(e);
@@ -269,7 +298,7 @@
             }
         });
 
-        // Cargar usuarios y transferencias al cargar la página
+        // Obtener datos al cargar la página
         $(document).ready(() => {
             getUsuarios();
             getTransferencias();
